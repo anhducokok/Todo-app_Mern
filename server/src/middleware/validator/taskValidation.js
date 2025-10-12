@@ -10,7 +10,7 @@ const taskSchema = Joi.object({
 });
 
 
-function validateTask(req, res, next) {
+function validateCreateTask(req, res, next) {
   const { error,value } = taskSchema.validate(req.body, { abortEarly: false });
   if (error) {
     return res.status(400).json({
@@ -22,4 +22,20 @@ function validateTask(req, res, next) {
   next();
 }
 
-export { validateTask };
+function validateUpdateTask(req, res, next) {
+  const taskSchema = Joi.object({
+    title: Joi.string().min(1).max(255).optional().trim(),
+    priority: Joi.string().valid('low', 'medium', 'high').optional(),
+  });
+  const { error, value } = taskSchema.validate(req.body, { abortEarly: false });
+  if (error) {
+    return res.status(400).json({
+      message: 'Validation error',
+      details: error.details.map(detail => detail.message),
+    });
+  }
+  req.body = value;
+  next();
+}
+
+export { validateCreateTask, validateUpdateTask };
