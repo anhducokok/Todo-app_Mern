@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "description": "Complete API documentation for Task Management application with user authentication"
   },
-  "host": "localhost:5001",
+  "host": "localhost:3000",
   "servers": [
     {
       "url": "http://localhost:5001",
@@ -220,6 +220,9 @@
               "$ref": "#/definitions/Task"
             }
           },
+          "400": {
+            "description": "Bad Request"
+          },
           "404": {
             "description": "Task not found"
           },
@@ -366,9 +369,6 @@
                 "name": "main"
               }
             }
-          },
-          "400": {
-            "description": "Bad Request"
           },
           "401": {
             "description": "Invalid credentials",
@@ -773,6 +773,9 @@
               "$ref": "#/definitions/Task"
             }
           },
+          "400": {
+            "description": "Bad Request"
+          },
           "404": {
             "description": "Task not found"
           },
@@ -963,9 +966,6 @@
                 "name": "main"
               }
             }
-          },
-          "400": {
-            "description": "Bad Request"
           },
           "401": {
             "description": "Invalid credentials",
