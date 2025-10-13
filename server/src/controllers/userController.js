@@ -1,150 +1,99 @@
-import User from "../models/User.js";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-// import { jwtService } from "express-jwt";
-const register = async (req, res) => {
-  const { username, email, password } = req.body;
+import userService from "../services/userService.js";
+
+export const register = async (req, res) => {
   try {
-    // Validation
-    if (!username || !email || !password) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
-
-    if (password.length < 6) {
-      return res.status(400).json({ message: "Password must be at least 6 characters" });
-    }
-
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
-    }
-
-    // Hash password
-    console.log("Registration - Original password:", password);
-    const hashedPassword = await bcrypt.hash(password, 10);
-    console.log("Registration - Hashed password:", hashedPassword);
+    const { username, email, password } = req.body;
     
-    // Test the hash immediately to make sure it works
-    const immediateTest = await bcrypt.compare(password, hashedPassword);
-    console.log("Registration - Immediate hash test:", immediateTest);
-
-    // Create new user
-    const newUser = new User({
-      username,
-      email,
-      password: hashedPassword,
-      role: "user", // default role
-    });
-
-    // Save user first
-    await newUser.save();
-    console.log("User saved successfully:", newUser._id);
-
-    // Generate JWT token AFTER saving
-    const token = jwt.sign({ 
-      id: newUser._id,
-      username: newUser.username,
-      email: newUser.email,
-      role: newUser.role
-    }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    const result = await userService.registerUser({ username, email, password });
     
-    res.status(201).json({ 
-      message: "User registered successfully",
-      token,
-      user: {
-        id: newUser._id,
-        username: newUser.username,
-        email: newUser.email,
-        role: newUser.role
-      }
-    });
+    res.status(201).json(result);
   } catch (error) {
-    console.error("Error registering user:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Error in register controller:", error);
+    
+    // Handle validation errors vs system errors
+    if (error.message.includes("đã tồn tại") || 
+        error.message.includes("ít nhất") || 
+        error.message.includes("không hợp lệ")) {
+      return res.status(400).json({ message: error.message.replace("Registration failed: ", "") });
+    }
+    
+    res.status(500).json({ 
+      message: "Lỗi hệ thống khi đăng ký" 
+    });
   }
 };
 
-const login = async (req, res) => {
-  let { email, password } = req.body;
+export const login = async (req, res) => {
   try {
-    if (!email || !password) {
-      return res
-        .status(400)
-        .json({ message: "Email and password are required" });
-    }
+    const { email, password } = req.body;
     
-    // Trim whitespace from inputs
-    email = email.trim().toLowerCase();
-    password = password.trim();
+    const result = await userService.loginUser({ email, password });
     
-    console.log("Login attempt - Email:", email);
-    console.log("Login attempt - Password:", password);
-    console.log("Password length:", password.length);
-    // Find user by email
-    const user = await User.findOne({ email }).select("+password");
-    if (!user) {
-      console.log("User not found with email:", email);
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
-    console.log("Found user:", user);
-    console.log("Comparing password:", password, "with hash:", user.password);
-    
-    // Debug: Test with the exact password that was used during registration
-    console.log("Testing password comparison...");
-    
-    // Test 1: Try comparing with the provided password
-    const isMatch = await bcrypt.compare(password, user.password);
-    console.log("Password match result:", isMatch);
-    
-    // Test 2: Let's try some common passwords to debug
-    const testPasswords = ['password123', 'Password123', '123456', 'test123'];
-    for (let testPass of testPasswords) {
-      const testResult = await bcrypt.compare(testPass, user.password);
-      console.log(`Testing "${testPass}": ${testResult}`);
-    }
-    
-    // Test 3: Create a fresh hash with the same password and see if it works
-    const freshHash = await bcrypt.hash(password, 10);
-    const freshTest = await bcrypt.compare(password, freshHash);
-    console.log("Fresh hash test (should be true):", freshTest);
-    
-    if (!isMatch) {
-      console.log("Invalid password for user:", email);
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
-    const token = jwt.sign(
-      {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
-
-    res.status(200).json({
-      message: "Login successful",
-      token,
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-      },
-    });
+    res.status(200).json(result);
   } catch (error) {
-    console.error("Error logging in user:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Error in login controller:", error);
+    
+    // Handle authentication errors vs system errors
+    if (error.message.includes("không chính xác") || 
+        error.message.includes("bắt buộc")) {
+      return res.status(401).json({ message: error.message.replace("Login failed: ", "") });
+    }
+    
+    res.status(500).json({ 
+      message: "Lỗi hệ thống khi đăng nhập" 
+    });
   }
 };
 
-const logout = (req, res) => {
-  // Since JWT is stateless, logout can be handled on the client side by deleting the token
-  res.status(200).json({ message: "Logged out successfully" });
+export const logout = (req, res) => {
+  // JWT is stateless, so logout is handled on client side
+  res.status(200).json({ 
+    message: "Đăng xuất thành công" 
+  });
 };
 
-export { register, login, logout };
+export const getProfile = async (req, res) => {
+  try {
+    const userId = req.user.id; // From auth middleware
+    
+    const user = await userService.getUserProfile(userId);
+    
+    res.status(200).json({ user });
+  } catch (error) {
+    console.error("Error in getProfile controller:", error);
+    
+    if (error.message.includes("Không tìm thấy")) {
+      return res.status(404).json({ message: error.message.replace("Failed to get profile: ", "") });
+    }
+    
+    res.status(500).json({ 
+      message: "Lỗi hệ thống khi lấy thông tin" 
+    });
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.id; // From auth middleware
+    const { username, email } = req.body;
+    
+    const result = await userService.updateUserProfile(userId, { username, email });
+    
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error in updateProfile controller:", error);
+    
+    if (error.message.includes("Không tìm thấy")) {
+      return res.status(404).json({ message: error.message.replace("Failed to update profile: ", "") });
+    }
+    
+    if (error.message.includes("ít nhất") || 
+        error.message.includes("không hợp lệ")) {
+      return res.status(400).json({ message: error.message.replace("Failed to update profile: ", "") });
+    }
+    
+    res.status(500).json({ 
+      message: "Lỗi hệ thống khi cập nhật thông tin" 
+    });
+  }
+};

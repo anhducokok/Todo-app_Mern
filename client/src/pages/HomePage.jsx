@@ -11,6 +11,7 @@ import React, { useEffect, useState } from "react"; // React hooks
 import axios from "axios"; // Thư viện gọi API
 import { visibleTaskLimit } from "@/lib/data";
 import { Spinner } from "@/components/ui/spinner";
+import Navigator from "@/components/Navigator";
 
 /**
  * HomePage Component - Trang chính của ứng dụng quản lý task
@@ -167,6 +168,7 @@ const HomePage = () => {
           {/* Header và Controls - Fixed top */}
           <div className="space-y-6 mb-6">
             <Header />
+            <Navigator />
             <AddTask handleNewTaskAdded={handleNewTaskAdded} />
             <StatsAndFilters
               filter={filter} // Giá trị filter hiện tại

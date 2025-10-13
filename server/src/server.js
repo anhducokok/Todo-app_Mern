@@ -1,12 +1,13 @@
 import express from "express";
 import taskRoutes from "./routes/taskRouters.js";
 import { connectDB } from "./config/db.js";
+import { authenticateToken } from "./middleware/auth.js";
 import dotenv from "dotenv";
 import cors from "cors";
 import swaggerUi from 'swagger-ui-express';
 import fs from 'fs';
 import path from 'path';
-import userRoutes from "./routes/userRouters.js"; // Commented out - file doesn't exist yet
+import userRoutes from "./routes/userRouters.js";
 
 dotenv.config();
 const app = express();
@@ -61,8 +62,8 @@ app.get("/", (req, res) => {
 });
 
 // API Routes
-app.use("/api/tasks", taskRoutes);
-app.use("/api/users", userRoutes); // Commented out - userRoutes file doesn't exist yet
+app.use("/api/tasks", authenticateToken, taskRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/health", (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
