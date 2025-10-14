@@ -1,7 +1,9 @@
 import React from "react";
+import Login from "./Auth/Login";
 
 const Navigator = () => {
-  const [isLogin, setIsLogin] = React.useState(true);
+  const [isLogin, setIsLogin] = React.useState(false);
+  const [isPopupOpen, setIsPopupOpen] = React.useState(false);
   const [showDropdown, setShowDropdown] = React.useState(false);
   const handleLogin = () => {
     // Logic for login (e.g., show login modal, redirect to login page, etc.)
@@ -14,17 +16,24 @@ const Navigator = () => {
   const handleDropdown = () => {
     setShowDropdown(!showDropdown);
   };
+  const handleOpenPopup = () => {
+    setIsPopupOpen(true);
+  };
+
   return (
     <div className="flex items-center justify-between p-4 border-b border-gray-200 gap-4 mb-4">
+      {isPopupOpen && (
+        <Login isPopupOpen={isPopupOpen} setIsPopupOpen={setIsPopupOpen} />
+      )}
       <div className="navigator p-4 flex justify-between space-x-4 w-3/4">
         <button className="btn">Home</button>
         
       </div>
       {/* User is logged in */}
       {isLogin ? (
-        <div className="flex justify-end w-1/4">
-          <button className="btn" onClick={() => setIsLogin(false)}>
-            Logout
+        <div className="flex justify-center w-1/4 cursor-pointer hover:bg-gray-100 p-2 rounded-md transition">
+          <button className="btn cursor-pointer" onClick={handleOpenPopup}>
+            Login
           </button>
         </div>
       ) : (
