@@ -30,6 +30,7 @@ const HomePage = () => {
   // State để lưu filter theo ngày/tuần/tháng (today, week, month, all)
   const [dateQuery, setDateQuery] = useState("all");
   const [isLoading, setIsLoading] = useState(false); // State để quản lý trạng thái loading
+   const [isLoginPopUp, setIsLoginPopUp] = useState(false);
   /**
    * useEffect Hook - Side effect sau khi component render
    *
@@ -67,6 +68,9 @@ const HomePage = () => {
       setIsLoading(false); // Kết thúc loading
       // Gọi API với query parameter filter để lọc theo ngày
     let res;
+    const token = localStorage.getItem('token');
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    // console.log("Token:", token);
     if (!searchQuery.trim()) {
       res = await axios.get(
         `http://localhost:5001/api/tasks?filter=${dateQuery}`
