@@ -19,17 +19,19 @@ import { Badge } from "./ui/badge";
  * @param {Object} task - Object chứa thông tin task (title, status, createdAt, completedAt)
  * @param {number} index - Vị trí của task trong danh sách (dùng cho animation delay)
  */
-const TaskCard = ({ task, index, handleTaskChanged }) => {
+const TaskCard = ({ task, index, handleTaskChanged,config }) => {
   const [isEditing, setIsEditing] = React.useState(false);
   const [updateTask, setUpdateTask] = React.useState(task.title || "");
+  // const { token } = useAuth();
 
+  
   // ham updateTask dder goi api update task
   const updateTasks = async () => {
     try {
       setIsEditing(false);
       await axios.put(`http://localhost:5001/api/tasks/${task._id}`, {
         title: updateTask,
-      });
+      }, config);
       handleTaskChanged(); // reload task list
       toast.success("Cập nhật task thành công");
     } catch (error) {
@@ -42,7 +44,7 @@ const TaskCard = ({ task, index, handleTaskChanged }) => {
       await axios.put(`http://localhost:5001/api/tasks/${task._id}`, {
         status: task.status === "active" ? "completed" : "active",
         completed: task.status === "active" ? new Date() : null,
-      });
+      }, config);
       handleTaskChanged();
       toast.success("Cập nhật task thành công");
     } catch (error) {
@@ -52,7 +54,7 @@ const TaskCard = ({ task, index, handleTaskChanged }) => {
   };
   const handleDelete = async () => {
     try {
-      await axios.delete(`http://localhost:5001/api/tasks/${task._id}`);
+      await axios.delete(`http://localhost:5001/api/tasks/${task._id}`, config);
       handleTaskChanged();
       toast.success("Xóa task thành công");
     } catch (error) {

@@ -230,6 +230,7 @@ const HomePage = () => {
               <TaskList
                 filteredTasks={visibleTask} // Tasks đã được filter
                 handleTaskChanged={handleNewTaskAdded} // Callback khi task thay đổi
+                config={{ headers: { Authorization: `Bearer ${token}` } }}
               />
             </div>
 
