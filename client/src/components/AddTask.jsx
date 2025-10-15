@@ -6,6 +6,7 @@ import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 import {
   Select,
   SelectContent,
@@ -18,27 +19,43 @@ const AddTask = ({ handleNewTaskAdded }) => {
   const [taskTitle, setTaskTitle] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false); // Thêm loading state
   const [priority, setPriority] = React.useState("low"); // Thêm state cho priority
+  const { token, isLoggedIn } = useAuth();
 
   const addTask = async () => {
+    if (!isLoggedIn || !token) {
+      toast.error("Please log in to add tasks");
+      return;
+    }
+
     if (taskTitle.trim()) {
       const taskTitleToAdd = taskTitle.trim();
       setIsLoading(true);
       
       // Optimistic update: clear input ngay lập tức
       setTaskTitle("");
-      // setPriority("low");
       
       try {
+        const config = {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        };
+
         await axios.post("http://localhost:5001/api/tasks", {
           title: taskTitleToAdd,
           priority,
-        });
+        }, config);
+        
         toast.success(`Thêm task "${taskTitleToAdd}" thành công`);
         handleNewTaskAdded(); // reload task list
       } catch (error) {
         // Nếu lỗi, khôi phục lại title
         setTaskTitle(taskTitleToAdd);
-        toast.error("Thêm task thất bại");
+        if (error.response?.status === 401) {
+          toast.error("Session expired. Please login again.");
+        } else {
+          toast.error("Thêm task thất bại");
+        }
         console.error("Lỗi khi thêm task", error);
       } finally {
         setIsLoading(false); // Đảm bảo reset loading state

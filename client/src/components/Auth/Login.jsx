@@ -1,12 +1,13 @@
 import React from 'react'
 import { useState } from "react";
-import { login } from '@/api/auth';
+import { useAuth } from '@/context/AuthContext';
 
 const Login = ({ isPopupOpen, setIsPopupOpen }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -14,19 +15,13 @@ const Login = ({ isPopupOpen, setIsPopupOpen }) => {
     setError("");
     
     try {
-      // Clear any existing malformed token
-      localStorage.removeItem('token');
-      
-      const data = await login(email, password);
-      
-      if (data.token) {
-        alert(`Welcome ${data.user.username}`);
-        // Call parent component's success handler instead of hard redirect
-        
-      }
+      await login(email, password);
+      setIsPopupOpen(false);
+      setEmail("");
+      setPassword("");
     } catch (err) {
       console.error('Login error:', err);
-      setError(err.response?.data?.message || "Invalid credentials");
+      setError(err.response?.data?.message || err.message || "Invalid credentials");
     } finally {
       setIsLoading(false);
     }
@@ -69,6 +64,7 @@ const Login = ({ isPopupOpen, setIsPopupOpen }) => {
                 autoComplete="on"
                 required
                 disabled={isLoading}
+                
               />
             </div>
             <div className="mb-6">
