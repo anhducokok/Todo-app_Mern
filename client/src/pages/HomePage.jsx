@@ -12,14 +12,15 @@ import axios from "axios"; // Thư viện gọi API
 import { visibleTaskLimit } from "@/lib/data";
 import { Spinner } from "@/components/ui/spinner";
 import Navigator from "@/components/Navigator";
+import { useAuth } from "@/context/AuthContext";
 
 /**
  * HomePage Component - Trang chính của ứng dụng quản lý task
  * Quản lý state và logic chính của app
  */
 const HomePage = () => {
-  // STATE MANAGEMENT
-  // Thay vì dùng nhiều state riêng lẻ, gom chung vào 1 object để dễ quản lý
+  const { user, isLoggedIn, token } = useAuth();
+
   const [taskData, setTaskData] = useState({
     taskList: [], // Danh sách tất cả tasks từ API
     activeTaskCount: 0, // Số lượng task đang active
@@ -30,56 +31,46 @@ const HomePage = () => {
   // State để lưu filter theo ngày/tuần/tháng (today, week, month, all)
   const [dateQuery, setDateQuery] = useState("all");
   const [isLoading, setIsLoading] = useState(false); // State để quản lý trạng thái loading
-   const [isLoginPopUp, setIsLoginPopUp] = useState(false);
-  /**
-   * useEffect Hook - Side effect sau khi component render
-   *
-   * Cách hoạt động:
-   * 1. useEffect(() => {...}, [dependencies])
-   * 2. Function trong useEffect sẽ chạy SAU KHI component render
-   * 3. Dependencies array [dateQuery] quyết định KHI NÀO effect chạy lại:
-   *    - Nếu [] (rỗng): chỉ chạy 1 lần khi component mount
-   *    - Nếu [dateQuery]: chạy lại MỖI KHI dateQuery thay đổi
-   *    - Nếu không có: chạy sau MỖI lần render (nguy hiểm!)
-   *
-   * Trong trường hợp này:
-   * - Khi component load lần đầu → gọi fetchTask()
-   * - Khi user thay đổi dateQuery (hôm nay/tuần này/tháng này) → gọi lại fetchTask()
-   */
-  useEffect(() => {
-    fetchTask(); // Gọi API để lấy data
-    // console.log(`Home page Search Query: ${searchQuery}`)
-  }, [dateQuery, searchQuery]); // Dependency: chạy lại khi dateQuery hoặc searchQuery thay đổi
 
-  // State để lưu filter theo status (all, active, completed)
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchTask();
+    }
+  }, [dateQuery, searchQuery, isLoggedIn]); 
+
   const [filter, setFilter] = useState("all");
   const [filterPriority, setFilterPriority] = useState("all");
 
-  /**
-   * Function gọi API để lấy danh sách tasks
-   * Sử dụng async/await để xử lý Promise
-   */
   const fetchTask = async () => {
-    try {
-      setIsLoading(true); // Bắt đầu loading
-      // Giả lập delay để thấy được hiệu ứng loading (chỉ để demo, không cần trong thực tế)
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      // console.log("Fetching tasks with search query:", searchQuery);
-      setIsLoading(false); // Kết thúc loading
-      // Gọi API với query parameter filter để lọc theo ngày
-    let res;
-    const token = localStorage.getItem('token');
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    // console.log("Token:", token);
-    if (!searchQuery.trim()) {
-      res = await axios.get(
-        `http://localhost:5001/api/tasks?filter=${dateQuery}`
-      );
-    } else {
-      res = await axios.get(
-        `http://localhost:5001/api/tasks?filter=${dateQuery}&search=${searchQuery}`
-      );
+    if (!token || !isLoggedIn) {
+      console.log("No authentication token available");
+      setTaskData({ taskList: [], activeTaskCount: 0, completedTaskCount: 0 });
+      return;
     }
+
+    try {
+      setIsLoading(true); 
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      // Set authorization header for this request
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      };
+
+      let res;
+      if (!searchQuery.trim()) {
+        res = await axios.get(
+          `http://localhost:5001/api/tasks?filter=${dateQuery}`,
+          config
+        );
+      } else {
+        res = await axios.get(
+          `http://localhost:5001/api/tasks?filter=${dateQuery}&search=${searchQuery}`,
+          config
+        );
+      }
 
       // Cập nhật state với data từ API response
       setTaskData({
@@ -90,12 +81,17 @@ const HomePage = () => {
         activeTaskCount: res.data.activeCount,
         completedTaskCount: res.data.completedCount,
       });
-    
 
-      console.log(res.data.tasks[0].status); // Debug: log status của task đầu tiên
+      console.log(`Fetched ${res.data.tasks.length} tasks for user:`, user?.username);
     } catch (e) {
       console.log("Lỗi khi truy vấn data", e);
-      toast.error("Lỗi khi truy vấn data"); // Hiển thị thông báo lỗi cho user
+      if (e.response?.status === 401) {
+        toast.error("Session expired. Please login again.");
+      } else {
+        toast.error("Lỗi khi truy vấn data");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -147,6 +143,46 @@ const HomePage = () => {
     setPage(1); // Reset về trang 1 khi search
   };
 
+  // Hiển thị welcome message hoặc prompt để login
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen w-full relative">
+        <div
+          className="absolute inset-0 z-0"
+          style={{
+            background:
+              "radial-gradient(125% 125% at 50% 90%, #ffffff 20%, #fdfdfd 60%, #eeeeee 100%)",
+          }}
+        />
+        
+        <div className="container pt-8 mx-auto relative z-10">
+          <div className="w-full max-w-2xl mx-auto">
+            <div className="space-y-6 mb-6">
+              <Header />
+              <Navigator />
+            </div>
+            
+            <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+              <div className="bg-white p-8 rounded-lg shadow-lg">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                  Welcome to Task Manager
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  Please log in to view and manage your tasks.
+                </p>
+                <div className="text-sm text-gray-500">
+                  <p>🚀 Organize your daily tasks</p>
+                  <p>📊 Track your progress</p>
+                  <p>✅ Stay productive</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     /* JSX Return - Cấu trúc UI của component */
     <div className="min-h-screen w-full relative">
@@ -194,6 +230,7 @@ const HomePage = () => {
               <TaskList
                 filteredTasks={visibleTask} // Tasks đã được filter
                 handleTaskChanged={handleNewTaskAdded} // Callback khi task thay đổi
+                config={{ headers: { Authorization: `Bearer ${token}` } }}
               />
             </div>
 
