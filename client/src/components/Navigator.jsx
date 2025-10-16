@@ -1,14 +1,19 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Login from "./Auth/Login";
 import { useAuth } from "@/context/AuthContext";
+import Register from "./Auth/Register";
 
 const Navigator = () => {
   const { user, isLoggedIn, logout, loading } = useAuth();
-  const [isPopupOpen, setIsPopupOpen] = React.useState(false);
-  const [showDropdown, setShowDropdown] = React.useState(false);
-  
-  const handleOpenPopup = () => {
-    setIsPopupOpen(true);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [isRegisterPopup, setIsRegisterPopup] = useState(false);
+  const handleOpenPopup = (type) => {
+    if(type==="login"){
+      setIsPopupOpen(true);
+    } else{
+      setIsRegisterPopup(true);
+    }
   };
 
   const handleLogout = () => {
@@ -21,7 +26,7 @@ const Navigator = () => {
   };
 
   // Close dropdown when clicking outside
-  React.useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = () => {
       setShowDropdown(false);
     };
@@ -50,21 +55,38 @@ const Navigator = () => {
       {isPopupOpen && (
         <Login isPopupOpen={isPopupOpen} setIsPopupOpen={setIsPopupOpen} />
       )}
-      
-      <div className="navigator p-4 flex justify-between space-x-4 w-3/4">
+      {isRegisterPopup && (
+        <Register isRegisterPopup={isRegisterPopup} setIsRegisterPopup={setIsRegisterPopup} />
+      )}
+      <div className="navigator flex justify-start space-x-4 w-3/4">
+      <div className="w-1/4 cursor-pointer p-2 hover:bg-gray-100 rounded-md transition">
         <button className="btn">Home</button>
+        </div>
+        <div className="w-1/4 cursor-pointer p-2 hover:bg-gray-100 rounded-md transition">
+          <button className="btn">Pomodoro</button>
+        </div>
       </div>
 
       {/* Authentication Section */}
-      {!isLoggedIn ? (
+      {!isLoggedIn  ? (
         // User is NOT logged in - Show Login button
-        <div className="flex justify-center w-1/4 cursor-pointer hover:bg-gray-100 p-2 rounded-md transition">
+        <div className="flex justify-center ">
+        <div className="flex justify-center w-1/4 cursor-pointer hover:bg-gray-100 p-2 rounded-md transition m-2">
           <button 
-            className="btn cursor-pointer bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" 
-            onClick={handleOpenPopup}
+            className="btn cursor-pointer bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 ml-2" 
+            onClick={() => handleOpenPopup("login")}
           >
             Login
           </button>
+
+        </div>
+        <div className="flex justify-center w-3/4 cursor-pointer hover:bg-gray-100 p-2 rounded-md transition m-2">
+          <button className="btn cursor-pointer bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 ml-2" 
+            onClick={() => handleOpenPopup("register")}
+          >
+            Sign Up
+          </button>
+        </div>
         </div>
       ) : (
         // User IS logged in - Show user info and dropdown
