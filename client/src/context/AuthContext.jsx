@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { login as apiLogin, logout as apiLogout } from '@/api/auth';
+import { login as apiLogin, logout as apiLogout ,register as apiRegister} from '@/api/auth';
+import { toast } from 'sonner';
 
 // Tạo AuthContext
 const AuthContext = createContext();
@@ -47,6 +48,18 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // Login function
+  const handleRegister = async(username,email,password) =>{
+    try{
+      setLoading(true);
+      await apiRegister(username,email,password);
+      setLoading(false);
+      toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
+      return {success:true};
+    }catch (error){
+      toast.error("Đăng ký thất bại! Vui lòng thử lại.");
+        console.log("Register Error!!!", error)
+    }
+  }
   const handleLogin = async (email, password) => {
     try {
       setLoading(true);
@@ -129,6 +142,7 @@ export const AuthProvider = ({ children }) => {
     logout: handleLogout,
     getAuthHeaders,
     checkAuthentication,
+    register: handleRegister,
   };
 
   return (

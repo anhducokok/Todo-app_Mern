@@ -92,6 +92,21 @@ const Login = ({ isPopupOpen, setIsPopupOpen }) => {
                 {isLoading ? "Signing In..." : "Sign In"}
               </button>
             </div>
+            {/* Button to navigate to registration form */}
+            <div className="text-center mt-4">
+              <p className="text-sm text-gray-600">
+                Don't have an account?{" "}
+                <button
+                  onClick={() => {
+                    setIsPopupOpen(true);
+                    setIsLogin(true);
+                  }}
+                  className="text-blue-500 hover:text-blue-700"
+                >
+                  Sign Up
+                </button>
+              </p>
+            </div>
             {error && <p className="text-red-500 text-sm mt-4">{error}</p>}
           </form>
         </div>
