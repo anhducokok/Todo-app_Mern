@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import Login from "./Auth/Login";
+import Login from "../auth/Login";
 import { useAuth } from "@/context/AuthContext";
-import Register from "./Auth/Register";
+import Register from "../auth/Register";
 
 const Navigator = () => {
   const { user, isLoggedIn, logout, loading } = useAuth();
@@ -63,7 +63,7 @@ const Navigator = () => {
         <button className="btn">Home</button>
         </div>
         <div className="w-1/4 cursor-pointer p-2 hover:bg-gray-100 rounded-md transition">
-          <button className="btn">Pomodoro</button>
+          <button className="btn" ><a href="/Pomodoro">Pomodoro</a></button>
         </div>
       </div>
 
