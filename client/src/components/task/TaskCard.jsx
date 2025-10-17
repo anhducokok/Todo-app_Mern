@@ -1,7 +1,7 @@
 import React from "react";
-import { Card } from "./ui/card";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
+import { Card } from "../ui/card";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 import { cn } from "@/lib/utils";
 import {
   Calendar,
@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
-import { Badge } from "./ui/badge";
+import { Badge } from "../ui/badge";
 
 /**
  * TaskCard component - Hiển thị thông tin một task dưới dạng card

@@ -1,7 +1,7 @@
 import React from "react";
-import { Card } from "./ui/card";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
+import { Card } from "../ui/card";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";

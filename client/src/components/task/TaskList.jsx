@@ -6,7 +6,7 @@ import TaskEmptyState from "./TaskEmptyState";
 const TaskList = ({ filteredTasks, handleTaskChanged, config }) => {
   let filter = 'all';
   
-  if (filteredTasks.length === 0 || !filteredTasks) {
+  if (filteredTasks.length === 0 || !filteredTasks || config===null) {
     return <TaskEmptyState filter={filter} />;
   }
   return (

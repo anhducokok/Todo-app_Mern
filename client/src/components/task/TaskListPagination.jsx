@@ -8,7 +8,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
-import { Badge } from "./ui/badge";
+import { Badge } from "../ui/badge";
 import { FilterTypes } from "@/lib/data";
 const TaskListPagination = ({
   handleNextPage,

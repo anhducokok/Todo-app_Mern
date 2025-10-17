@@ -1,17 +1,17 @@
 // Import các components cần thiết từ các thư mục khác nhau
-import AddTask from "@/components/AddTask";
-import Header from "@/components/Header";
-import StatsAndFilters from "@/components/StatsAndFilters";
-import TaskList from "@/components/TaskList";
-import TaskListPagination from "@/components/TaskListPagination";
-import Footer from "@/components/Footer";
-import DateTimeFilter from "@/components/DateTimeFilter";
+import AddTask from "@/components/task/AddTask";
+import Header from "@/components/common/Header";
+import StatsAndFilters from "@/components/filters/StatsAndFilters";
+import TaskList from "@/components/task/TaskList";
+import TaskListPagination from "@/components/task/TaskListPagination";
+import Footer from "@/components/common/Footer";
+import DateTimeFilter from "@/components/filters/DateTimeFilter";
 import { Toaster, toast } from "sonner"; // Thư viện hiển thị notifications
 import React, { useEffect, useState } from "react"; // React hooks
 import axios from "axios"; // Thư viện gọi API
 import { visibleTaskLimit } from "@/lib/data";
 import { Spinner } from "@/components/ui/spinner";
-import Navigator from "@/components/Navigator";
+import Navigator from "@/components/common/Navigator";
 import { useAuth } from "@/context/AuthContext";
 
 /**
@@ -161,22 +161,18 @@ const HomePage = () => {
               <Header />
               <Navigator />
             </div>
-            
-            <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
-              <div className="bg-white p-8 rounded-lg shadow-lg">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                  Welcome to Task Manager
-                </h2>
-                <p className="text-gray-600 mb-6">
-                  Please log in to view and manage your tasks.
-                </p>
-                <div className="text-sm text-gray-500">
-                  <p>🚀 Organize your daily tasks</p>
-                  <p>📊 Track your progress</p>
-                  <p>✅ Stay productive</p>
-                </div>
-              </div>
+            <div className="flex-1 mb-6">
+              <TaskList
+                filteredTasks={visibleTask} // Tasks đã được filter
+                handleTaskChanged={handleNewTaskAdded} // Callback khi task thay đổi
+                config={null}
+              />
             </div>
+            <Footer
+              className="absolute bottom-0 left-0 w-full"
+              completedTaskCount={0}
+              activeTaskCount={0}
+            />
           </div>
         </div>
       </div>
