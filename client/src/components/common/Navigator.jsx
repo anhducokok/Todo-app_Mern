@@ -9,9 +9,9 @@ const Navigator = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [isRegisterPopup, setIsRegisterPopup] = useState(false);
   const handleOpenPopup = (type) => {
-    if(type==="login"){
+    if (type === "login") {
       setIsPopupOpen(true);
-    } else{
+    } else {
       setIsRegisterPopup(true);
     }
   };
@@ -32,8 +32,8 @@ const Navigator = () => {
     };
 
     if (showDropdown) {
-      document.addEventListener('click', handleClickOutside);
-      return () => document.removeEventListener('click', handleClickOutside);
+      document.addEventListener("click", handleClickOutside);
+      return () => document.removeEventListener("click", handleClickOutside);
     }
   }, [showDropdown]);
 
@@ -56,62 +56,84 @@ const Navigator = () => {
         <Login isPopupOpen={isPopupOpen} setIsPopupOpen={setIsPopupOpen} />
       )}
       {isRegisterPopup && (
-        <Register isRegisterPopup={isRegisterPopup} setIsRegisterPopup={setIsRegisterPopup} />
+        <Register
+          isRegisterPopup={isRegisterPopup}
+          setIsRegisterPopup={setIsRegisterPopup}
+        />
       )}
       <div className="navigator flex justify-start space-x-4 w-3/4">
-      <div className="w-1/4 cursor-pointer p-2 hover:bg-gray-100 rounded-md transition">
-        <button className="btn">Home</button>
+      {/* Navigation Logo */}
+      <div className=" cursor-pointer p-1 rounded-md transition ">
+          <button className="btn">
+            <a href="/"><img src="/nogo.png" alt="okToDO" className="h-8" /></a>
+          </button>
         </div>
-        <div className="w-1/4 cursor-pointer p-2 hover:bg-gray-100 rounded-md transition">
-          <button className="btn" ><a href="/Pomodoro">Pomodoro</a></button>
+        <div className="w-1/4 cursor-pointer p-2 hover:bg-gray-100 rounded-md transition font-bold">
+          <button className="btn"> <a href="/">Home</a></button>
+        </div>
+        <div className="w-1/4 cursor-pointer p-2 hover:bg-gray-100 rounded-md transition font-bold">
+          <button className="btn">
+            <a href="/Pomodoro">Pomodoro</a>
+          </button>
         </div>
       </div>
 
       {/* Authentication Section */}
-      {!isLoggedIn  ? (
+      {!isLoggedIn ? (
         // User is NOT logged in - Show Login button
         <div className="flex justify-center ">
-        <div className="flex justify-center w-1/4 cursor-pointer hover:bg-gray-100 p-2 rounded-md transition m-2">
-          <button 
-            className="btn cursor-pointer bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 ml-2" 
-            onClick={() => handleOpenPopup("login")}
-          >
-            Login
-          </button>
-
-        </div>
-        <div className="flex justify-center w-3/4 cursor-pointer hover:bg-gray-100 p-2 rounded-md transition m-2">
-          <button className="btn cursor-pointer bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 ml-2" 
-            onClick={() => handleOpenPopup("register")}
-          >
-            Sign Up
-          </button>
-        </div>
+          <div className="flex justify-center w-1/4 cursor-pointer hover:bg-gray-100 p-2 rounded-md transition m-2">
+            <button
+              className="btn cursor-pointer bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 ml-2"
+              onClick={() => handleOpenPopup("login")}
+            >
+              Login
+            </button>
+          </div>
+          <div className="flex justify-center w-3/4 cursor-pointer hover:bg-gray-100 p-2 rounded-md transition m-2">
+            <button
+              className="btn cursor-pointer bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 ml-2"
+              onClick={() => handleOpenPopup("register")}
+            >
+              Sign Up
+            </button>
+          </div>
         </div>
       ) : (
         // User IS logged in - Show user info and dropdown
         <div className="flex justify-end w-1/4 relative">
-          <div 
-            className="flex items-center cursor-pointer hover:bg-gray-100 p-2 rounded-md transition" 
+          <div
+            className="flex items-center cursor-pointer hover:bg-gray-100 p-2 rounded-md transition"
             onClick={(e) => {
               e.stopPropagation(); // Ngăn click lan ra ngoài
               handleDropdown();
             }}
           >
             <img
-              src={`https://ui-avatars.com/api/?name=${user?.username || 'User'}&background=0ea5e9&color=fff`}
+              src={`https://ui-avatars.com/api/?name=${
+                user?.username || "User"
+              }&background=0ea5e9&color=fff`}
               alt="User Avatar"
               className="w-8 h-8 rounded-full"
             />
-            <span className="ml-2 text-sm font-medium">{user?.username || 'User'}</span>
-            <svg 
-              className="w-4 h-4 ml-1 transition-transform duration-200" 
-              style={{ transform: showDropdown ? 'rotate(180deg)' : 'rotate(0deg)' }}
-              fill="none" 
-              stroke="currentColor" 
+            <span className="ml-2 text-sm font-medium">
+              {user?.username || "User"}
+            </span>
+            <svg
+              className="w-4 h-4 ml-1 transition-transform duration-200"
+              style={{
+                transform: showDropdown ? "rotate(180deg)" : "rotate(0deg)",
+              }}
+              fill="none"
+              stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </div>
 
@@ -122,7 +144,7 @@ const Navigator = () => {
                 <div className="font-medium">{user?.username}</div>
                 <div className="text-xs">{user?.email}</div>
               </div>
-              
+
               <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition">
                 Profile
               </button>
