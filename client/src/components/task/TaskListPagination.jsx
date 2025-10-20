@@ -46,7 +46,7 @@ const TaskListPagination = ({
   };
   return (
     <>
-      <div className=" items-start justify-between gap-4 sm:flex-row sm:items-center w-full mb-4">
+      <div className=" items-start justify-between gap-4 sm:flex-row sm:items-center w-3/4 mb-4">
         {/* Phần thống kê */}
         <div className="flex gap-3">
           <Badge

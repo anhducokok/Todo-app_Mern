@@ -203,7 +203,7 @@ const HomePage = () => {
         <div className="w-full max-w-2xl mx-auto">
           {/* Header và Controls - Fixed top */}
           <div className="space-y-6 mb-6">
-            <Header />
+            {/* <Header /> */}
             <Navigator />
             <AddTask handleNewTaskAdded={handleNewTaskAdded} />
             <StatsAndFilters

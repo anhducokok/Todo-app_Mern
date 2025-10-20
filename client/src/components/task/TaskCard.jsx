@@ -74,9 +74,14 @@ const TaskCard = ({ task, index, handleTaskChanged,config }) => {
     // the Card field have more hightlight than the background
     <Card
       className={cn(
-        "group p-4 bg-gradient-card border-0 shadow-custom-md hover:shadow-custom-lg transition-all duration-200 animate-~fade-in ",
+        "cursor-pointer group p-4 bg-gradient-card border-0 shadow-custom-md hover:shadow-custom-lg transition-all duration-200 animate-~fade-in ",
         task.status === "completed" ? "opacity-70" : "opacity-100"
       )}
+      style={{ animationDelay: `${index * 50}ms` }}
+      // Navigate to task pomodoro page when click card
+      onClick={() => {
+        window.location.href = `/Pomodoro?task=${task._id}`;
+      }}
     >
       
       {/* Flexbox container chính */}
