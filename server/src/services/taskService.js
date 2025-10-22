@@ -10,7 +10,13 @@ class TaskService {
     if (search && search.trim()) {
       query.title = { $regex: search.trim(), $options: "i" };
     }
-
+    // if(t_id && t_id.trim()){
+    //   query.taskId = { $regex: t_id.trim(), $options: "i" };
+    // }
+    // Add taskId filter
+    // if (taskId) {
+    //   query._id = taskRepository.toObjectId(taskId.trim());
+    // }
     // Add date filter
     const startDate = taskRepository.buildDateFilter(filter);
     if (startDate) {
@@ -21,10 +27,10 @@ class TaskService {
   }
 
   // Get tasks with aggregation and stats - BUSINESS LOGIC ONLY
-  async getTasksWithStats(filter = "today", search = "", userId = null) {
+  async getTasksWithStats(filter = "today", search = "",   userId = null) {
     try {
       const query = this.buildTaskQuery(filter, search, userId);
-      
+
       console.log("Final Query:", JSON.stringify(query, null, 2));
 
       // Use repository to get data from database

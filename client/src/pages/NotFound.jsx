@@ -1,6 +1,7 @@
 import React from "react";
 import NotFoundImage from "@/assets/404_NotFound.png";
 const NotFound = () => {
+  
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-center bg-slate-50">
       <img
