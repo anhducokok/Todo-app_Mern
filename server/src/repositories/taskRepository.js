@@ -1,3 +1,4 @@
+// import { SourceTextModule } from "vm";
 import Task from "../models/Task.js";
 import mongoose from "mongoose";
 
@@ -57,6 +58,7 @@ class TaskRepository {
 
   // Get tasks with stats using aggregation
   async getTasksWithStats(matchQuery, limit = 100) {
+    console.log("Aggregation Match Query:", JSON.stringify(matchQuery, null, 2));
     return await Task.aggregate([
       { $match: matchQuery },
       {
@@ -96,7 +98,10 @@ class TaskRepository {
 
   // Utility: Convert string ID to ObjectId
   toObjectId(id) {
-    return new mongoose.Types.ObjectId(id);
+     if (id && typeof id === "string" && mongoose.Types.ObjectId.isValid(id)) {
+      return new mongoose.Types.ObjectId(id);
+    }
+    return id;
   }
 
   // Utility: Build base query with common filters

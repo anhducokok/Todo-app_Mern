@@ -1,4 +1,5 @@
 import Navigator from "@/components/common/Navigator";
+import TaskPomodoro from "@/components/pomodoro/TaskPomodoro";
 import Timer from "@/components/pomodoro/Timer";
 import { useAuth } from "@/context/AuthContext";
 import React, { useState } from "react";
@@ -6,6 +7,11 @@ import React, { useState } from "react";
 const Pomodoro = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { user, isLoggedIn, token } = useAuth();
+  const config = {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    }
+  };
   const fetchTask = async () => {
     if (!token || !isLoggedIn) {
       console.log("No authentication token available");
@@ -39,6 +45,7 @@ const Pomodoro = () => {
           <div className="max-w-2xl mx-auto">
           <Navigator />
             <Timer />
+            <TaskPomodoro config={config} />
           </div>
         </div>
         

@@ -135,3 +135,24 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Pomodoro Timer Theme Classes */
+@layer components {
+  /* Work Timer Gradients */
+  .timer-work.timer-light {
+    background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+  }
+  
+  .timer-work.timer-dark {
+    background: linear-gradient(135deg, #dc2626 0%, #ea580c 50%, #f97316 100%);
+  }
+  
+  /* Break Timer Gradients */
+  .timer-break.timer-light {
+    background: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
+  }
+  
+  .timer-break.timer-dark {
+    background: linear-gradient(135deg, #16a34a 0%, #059669 50%, #047857 100%);
+  }
+}

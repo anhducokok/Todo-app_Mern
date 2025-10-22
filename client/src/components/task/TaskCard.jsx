@@ -13,25 +13,22 @@ import {
 import { toast } from "sonner";
 import axios from "axios";
 import { Badge } from "../ui/badge";
-
-/**
- * TaskCard component - Hiển thị thông tin một task dưới dạng card
- * @param {Object} task - Object chứa thông tin task (title, status, createdAt, completedAt)
- * @param {number} index - Vị trí của task trong danh sách (dùng cho animation delay)
- */
-const TaskCard = ({ task, index, handleTaskChanged,config }) => {
+const TaskCard = ({ task, index, handleTaskChanged, config }) => {
   const [isEditing, setIsEditing] = React.useState(false);
   const [updateTask, setUpdateTask] = React.useState(task.title || "");
   // const { token } = useAuth();
 
-  
   // ham updateTask dder goi api update task
   const updateTasks = async () => {
     try {
       setIsEditing(false);
-      await axios.put(`http://localhost:5001/api/tasks/${task._id}`, {
-        title: updateTask,
-      }, config);
+      await axios.put(
+        `http://localhost:5001/api/tasks/${task._id}`,
+        {
+          title: updateTask,
+        },
+        config
+      );
       handleTaskChanged(); // reload task list
       toast.success("Cập nhật task thành công");
     } catch (error) {
@@ -41,10 +38,14 @@ const TaskCard = ({ task, index, handleTaskChanged,config }) => {
   };
   const handleCheckboxClick = async () => {
     try {
-      await axios.put(`http://localhost:5001/api/tasks/${task._id}`, {
-        status: task.status === "active" ? "completed" : "active",
-        completed: task.status === "active" ? new Date() : null,
-      }, config);
+      await axios.put(
+        `http://localhost:5001/api/tasks/${task._id}`,
+        {
+          status: task.status === "active" ? "completed" : "active",
+          completed: task.status === "active" ? new Date() : null,
+        },
+        config
+      );
       handleTaskChanged();
       toast.success("Cập nhật task thành công");
     } catch (error) {
@@ -79,11 +80,7 @@ const TaskCard = ({ task, index, handleTaskChanged,config }) => {
       )}
       style={{ animationDelay: `${index * 50}ms` }}
       // Navigate to task pomodoro page when click card
-      onClick={() => {
-        window.location.href = `/Pomodoro?task=${task._id}`;
-      }}
     >
-      
       {/* Flexbox container chính */}
       <div className="flex items-center gap-4">
         <Button
@@ -120,9 +117,9 @@ const TaskCard = ({ task, index, handleTaskChanged,config }) => {
               value={updateTask}
               onChange={(e) => setUpdateTask(e.target.value)}
               onKeyPress={handleKeyPress} // Lưu khi nhấn Enter
-              onBlur={(e)=>{
+              onBlur={(e) => {
                 setIsEditing(false);
-                setUpdateTask(task.title||"");
+                setUpdateTask(task.title || "");
               }}
             />
           ) : (
@@ -132,6 +129,10 @@ const TaskCard = ({ task, index, handleTaskChanged,config }) => {
                 // Conditional: nếu completed thì có line-through
                 task.status === "completed" ? "line-through" : ""
               )}
+              onClick={() => {
+                window.location.href = `/Pomodoro?task=${task._id}`;
+                alert(`Navigating to /Pomodoro?task=${task._id}`);
+              }}
             >
               {task.title}
             </p>
@@ -157,7 +158,7 @@ const TaskCard = ({ task, index, handleTaskChanged,config }) => {
             )}
           </div>
           {/* Hiển thị priority */}
-         
+
           <div className="flex item-center gap-2 mt-1">
             {/* //  1 border và background đỏ vàng xanh tùy theo priority */}
             {task.priority === "high" && (
@@ -165,33 +166,30 @@ const TaskCard = ({ task, index, handleTaskChanged,config }) => {
                 variant="destructive"
                 className="bg-white/50 text-red-500 border-red-500/20"
               >
-              {/* <span className="text-xs text-muted-foreground ">Priority: </span> */}
-              {task.priority.toUpperCase()}
-            </Badge>
-
-          )}
+                {/* <span className="text-xs text-muted-foreground ">Priority: </span> */}
+                {task.priority.toUpperCase()}
+              </Badge>
+            )}
             {task.priority === "medium" && (
               <Badge
                 variant="outline"
                 className="bg-white/50 text-yellow-500 border-yellow-500/20"
               >
-              {/* <span className="text-xs text-muted-foreground ">Priority: </span> */}
-              {task.priority.toUpperCase()}
-            </Badge>
-          )}
+                {/* <span className="text-xs text-muted-foreground ">Priority: </span> */}
+                {task.priority.toUpperCase()}
+              </Badge>
+            )}
             {task.priority === "low" && (
               <Badge
                 variant="secondary"
                 className="bg-white/50 text-success border-success/20"
               >
-              {/* <span className="text-xs text-muted-foreground ">Priority: </span> */}
-              {task.priority.toUpperCase()}
-            </Badge>
-          )}
+                {/* <span className="text-xs text-muted-foreground ">Priority: </span> */}
+                {task.priority.toUpperCase()}
+              </Badge>
+            )}
           </div>
-
         </div>
-        
 
         {/* Container cho các nút action (Edit & Delete) */}
         <div className="hidden gap-2 group-hover:inline-flex animate-slide-up">
@@ -219,9 +217,8 @@ const TaskCard = ({ task, index, handleTaskChanged,config }) => {
           </Button>
         </div>
       </div>
-      
-  </Card>
-);
+    </Card>
+  );
 };
 
 export default TaskCard;

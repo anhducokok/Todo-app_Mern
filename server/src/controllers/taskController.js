@@ -2,7 +2,7 @@ import taskService from "../services/taskService.js";
 
 export const getTasks = async (req, res) => {
   try {
-    const { filter = "today", search = "" } = req.query;
+    const { filter = "today", search = ""} = req.query;
     const userId = req.user?.id; // Get from auth middleware (optional for now)
 
     const result = await taskService.getTasksWithStats(filter, search, userId);
@@ -15,7 +15,20 @@ export const getTasks = async (req, res) => {
     });
   }
 };
+export const getTaskById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.id; // Get from auth middleware (optional for now)
+    const task = await taskService.getTaskById(id, userId);
 
+    res.status(200).json(task);
+  } catch (error) {
+    console.error("Error in getTaskById controller:", error);
+    res.status(500).json({
+      message: error.message || "Lỗi hệ thống"
+    });
+  }
+};
 export const createTask = async (req, res) => {
   try {
     const { title, priority } = req.body;

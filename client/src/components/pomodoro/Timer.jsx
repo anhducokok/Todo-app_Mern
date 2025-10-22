@@ -16,6 +16,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Moon, Palette, Settings, Sun, X } from "lucide-react";
 import { useTheme } from "next-themes";
+import SettingLayout from "./SettingLayout";
 
 function pad(n) {
   return String(n).padStart(2, "0");
@@ -31,9 +32,17 @@ export default function Timer({
   const [isWork, setIsWork] = useState(true);
   const [secondsLeft, setSecondsLeft] = useState(workMinutes * 60);
   const [showSettings, setShowSettings] = useState(false);
+  const [forceRender, setForceRender] = useState(0);
   
-  // Theme hook - useTheme returns an object, not an array
-  const { theme, setTheme } = useTheme();
+  // Theme hook - prefer resolvedTheme for accurate current theme ('light' | 'dark')
+  const { resolvedTheme, setTheme } = useTheme();
+  
+  // Force re-render when theme changes
+  useEffect(() => {
+    console.log('Theme changed to:', resolvedTheme);
+    setForceRender(prev => prev + 1); // Force component re-render
+  }, [resolvedTheme]);
+  
   // Settings state
   const [settings, setSettings] = useState({
     workMinutes: workMinutes,
@@ -44,7 +53,7 @@ export default function Timer({
     autoStartWork: false,
   });
 
-  const [tempSettings, setTempSettings] = useState(settings);
+  // const [tempSettings, setTempSettings] = useState(settings);
   const timerRef = useRef(null);
 
   // Reset when mode changes
@@ -86,18 +95,18 @@ export default function Timer({
     setSecondsLeft(
       isWork ? settings.workMinutes * 60 : settings.breakMinutes * 60
     );
-  };
+  }; 
+  const [tempSettings, setTempSettings] = useState(settings);
 
   const handleSettingsOpen = () => {
     setTempSettings({ ...settings });
     setShowSettings(true);
   };
-
-  const handleSettingsClose = () => {
+       const handleSettingsClose = () => {
     setShowSettings(false);
     setTempSettings(settings); // Reset temp settings
   };
-
+ 
   const handleSettingsSave = () => {
     setSettings({ ...tempSettings });
     setShowSettings(false);
@@ -115,23 +124,34 @@ export default function Timer({
       [key]: parseInt(value) || 0,
     }));
   };
-
   const modeLabel = isWork ? "Work" : "Break";
   
-  // Theme-aware colors
-  const getModeColors = () => {
+  // Theme-aware gradient styles using CSS variables and theme detection
+  const getGradientStyle = () => {
+    const isDark = resolvedTheme === 'dark';
+    
     if (isWork) {
-      return theme === 'dark' 
-        ? "from-red-600 via-red-500 to-orange-600 dark:from-red-500 dark:to-orange-500" 
-        : "from-red-500 to-orange-500";
+      return {
+        background: isDark 
+          ? 'linear-gradient(135deg, #dc2626 0%, #ea580c 50%, #f97316 100%) !important' // darker reds/oranges for dark mode
+          : 'linear-gradient(135deg, #ef4444 0%, #f97316 100%) !important' // bright reds/oranges for light mode
+      };
     } else {
-      return theme === 'dark' 
-        ? "from-green-600 via-emerald-500 to-green-600 dark:from-green-500 dark:to-emerald-500" 
-        : "from-green-500 to-emerald-500";
+      return {
+        background: isDark
+          ? 'linear-gradient(135deg, #16a34a 0%, #059669 50%, #047857 100%) !important' // deeper greens for dark mode
+          : 'linear-gradient(135deg, #22c55e 0%, #10b981 100%) !important' // bright greens for light mode
+      };
     }
   };
-  
-  const modeColor = getModeColors();
+
+  // Alternative: CSS class approach for better performance
+  const getTimerClasses = () => {
+    const baseClasses = "flex flex-col items-center justify-center space-y-4 p-6 rounded-2xl shadow-lg text-white w-72 m-4 transition-all duration-500";
+    const themeClasses = resolvedTheme === 'dark' ? 'timer-dark' : 'timer-light';
+    const modeClasses = isWork ? 'timer-work' : 'timer-break';
+    return `${baseClasses} ${themeClasses} ${modeClasses}`;
+  };
 
   return (
     <>
@@ -142,7 +162,9 @@ export default function Timer({
       >
         <div className="justify-center items-center justify-items-center">
           <div
-            className={`flex flex-col items-center justify-center space-y-4 p-6 rounded-2xl shadow-lg bg-gradient-to-br ${modeColor} text-white w-72 ${className} m-4`}
+            key={`timer-${resolvedTheme}-${isWork}-${forceRender}`}
+            className={getTimerClasses()}
+            style={getGradientStyle()}
           >
             <div className="text-xl font-semibold tracking-wide">
               {modeLabel} Time
@@ -202,9 +224,9 @@ export default function Timer({
               variant="ghost"
               size="icon"
               className="text-muted-foreground hover:text-foreground hover:bg-muted"
-              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+              
             >
-              {theme === "light" ? (
+              {resolvedTheme === "light" ? (
                 <Moon className="h-5 w-5" />
               ) : (
                 <Sun className="h-5 w-5" />
@@ -213,143 +235,13 @@ export default function Timer({
           </div>
         </div>
       </Card>
-
-      {/* Settings Popup */}
       {showSettings && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-black/50 dark:bg-black/70 flex items-center justify-center z-50">
-          <Card className="w-96 max-w-md mx-4 bg-background border border-border">
-            <div className="p-6">
-            {/* Header */}
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-foreground">⚙️ Timer Settings</h2>
-              <Button
-                onClick={handleSettingsClose}
-                variant="ghost"
-                size="icon"
-                className="text-muted-foreground hover:text-foreground hover:bg-muted"
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </div>              {/* Settings Form */}
-              <div className="space-y-4">
-                {/* Work Duration */}
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    🍅 Work Duration (minutes)
-                  </label>
-                  <Input
-                    type="number"
-                    min="1"
-                    max="60"
-                    value={tempSettings.workMinutes}
-                    onChange={(e) =>
-                      handleTempSettingChange("workMinutes", e.target.value)
-                    }
-                    className="w-full"
-                  />
-                </div>
-
-                {/* Break Duration */}
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    ☕ Short Break (minutes)
-                  </label>
-                  <Input
-                    type="number"
-                    min="1"
-                    max="30"
-                    value={tempSettings.breakMinutes}
-                    onChange={(e) =>
-                      handleTempSettingChange("breakMinutes", e.target.value)
-                    }
-                    className="w-full"
-                  />
-                </div>
-
-                {/* Long Break Duration */}
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    🛋️ Long Break (minutes)
-                  </label>
-                  <Input
-                    type="number"
-                    min="1"
-                    max="60"
-                    value={tempSettings.longBreakMinutes}
-                    onChange={(e) =>
-                      handleTempSettingChange(
-                        "longBreakMinutes",
-                        e.target.value
-                      )
-                    }
-                    className="w-full"
-                  />
-                </div>
-
-                {/* Checkboxes for future features */}
-                <div className="space-y-2">
-                  <label className="flex items-center space-x-2 text-sm text-muted-foreground">
-                    <input
-                      type="checkbox"
-                      checked={tempSettings.soundEnabled}
-                      onChange={(e) =>
-                        setTempSettings((prev) => ({
-                          ...prev,
-                          soundEnabled: e.target.checked,
-                        }))
-                      }
-                      className="rounded"
-                    />
-                    <span>🔔 Sound notifications</span>
-                  </label>
-
-                  <label className="flex items-center space-x-2 text-sm text-muted-foreground">
-                    <input
-                      type="checkbox"
-                      checked={tempSettings.autoStartBreaks}
-                      onChange={(e) =>
-                        setTempSettings((prev) => ({
-                          ...prev,
-                          autoStartBreaks: e.target.checked,
-                        }))
-                      }
-                      className="rounded"
-                    />
-                    <span>🚀 Auto-start breaks</span>
-                  </label>
-
-                  <label className="flex items-center space-x-2 text-sm text-muted-foreground">
-                    <input
-                      type="checkbox"
-                      checked={tempSettings.autoStartWork}
-                      onChange={(e) =>
-                        setTempSettings((prev) => ({
-                          ...prev,
-                          autoStartWork: e.target.checked,
-                        }))
-                      }
-                      className="rounded"
-                    />
-                    <span>⚡ Auto-start work sessions</span>
-                  </label>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex justify-end space-x-3 mt-6">
-                <Button onClick={handleSettingsClose} variant="outline">
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleSettingsSave}
-                  className="bg-blue-500 hover:bg-blue-600 text-white"
-                >
-                  Save Settings
-                </Button>
-              </div>
-            </div>
-          </Card>
-        </div>
+        <SettingLayout
+          settings={settings}
+          onClose={handleSettingsClose}
+          onSave={handleSettingsSave}
+          onTempChange={handleTempSettingChange}
+        />
       )}
     </>
   );

@@ -4,6 +4,7 @@ import {
   createTask,
   updateTask,
   deleteTask,
+  getTaskById,
 } from "../controllers/taskController.js";
 
 const router = express.Router();
@@ -140,6 +141,29 @@ router.delete("/:id", (req, res) => {
     }
   */
   deleteTask(req, res);
-});
 
+});
+router.get("/:id", (req, res) => {
+  /* 
+    #swagger.tags = ['Tasks']
+    #swagger.summary = 'Get task by ID'
+    #swagger.description = 'Retrieve a task by its ID'
+    #swagger.parameters['id'] = {
+      in: 'path',
+      description: 'Task ID',
+      required: true,
+      type: 'string'
+    }
+    #swagger.responses[200] = {
+      description: 'Task retrieved successfully',
+      schema: {
+        $ref: '#/definitions/Task'
+      }
+    }
+    #swagger.responses[404] = {
+      description: 'Task not found'
+    }
+  */
+  getTaskById(req, res);
+});
 export default router;
