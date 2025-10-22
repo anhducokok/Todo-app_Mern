@@ -47,6 +47,34 @@ const TaskPomodoro = ({ config }) => {
     }
   };
 
+  const handleMarkComplete = async () => {
+    if (!currentTask || currentTask.status === 'completed') return;
+    
+    setLoading(true);
+    try {
+      const response = await axios.put(
+        `http://localhost:5001/api/tasks/${currentTask._id}`,
+        { ...currentTask, status: 'completed' },
+        config
+      );
+      
+      setCurrentTask(response.data);
+      
+      // Show success notification
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('Task Completed!', {
+          body: `Great job! "${currentTask.title}" has been marked as complete.`,
+          icon: '/task-icon.png'
+        });
+      }
+    } catch (error) {
+      console.error("Error updating task:", error);
+      setError("Failed to update task. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Format time display
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -95,20 +123,50 @@ const TaskPomodoro = ({ config }) => {
     );
   }
 
-  // No task ID in URL
+  // No task ID in URL - show task selector
   if (!taskId) {
     return (
-      <div className="p-6">
-        <Card className="p-6">
-          <div className="text-center py-8">
-            <Clock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No Task Selected</h3>
-            <p className="text-gray-600">
-              Please select a task from your task list to start a Pomodoro session.
-            </p>
+      <Card className="p-6">
+        <div className="text-center py-8">
+          <Clock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-4">No Task Selected</h3>
+          <p className="text-gray-600 mb-6">
+            Start a focused Pomodoro session by selecting a task, or work on a general focus session.
+          </p>
+          
+          <div className="space-y-3">
+            <Button 
+              onClick={() => window.open('/tasks', '_blank')} 
+              className="w-full"
+            >
+              📋 Select Task from List
+            </Button>
+            
+            <div className="text-sm text-gray-500 my-4">or</div>
+            
+            <Button 
+              variant="outline"
+              onClick={() => {
+                // Start general focus session
+                const url = new URL(window.location);
+                url.searchParams.set('task', 'general');
+                window.history.replaceState({}, '', url);
+                setCurrentTask({
+                  _id: 'general',
+                  title: 'General Focus Session',
+                  description: 'Focus on your current work without a specific task',
+                  priority: 'medium',
+                  status: 'active',
+                  createdAt: new Date().toISOString(),
+                });
+              }}
+              className="w-full"
+            >
+              🎯 Start General Focus Session
+            </Button>
           </div>
-        </Card>
-      </div>
+        </div>
+      </Card>
     );
   }
 
@@ -170,19 +228,56 @@ const TaskPomodoro = ({ config }) => {
           )}
         </div>
 
-        {/* Pomodoro Timer */}
-       
+        {/* Task Progress */}
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-medium text-blue-900 dark:text-blue-100">
+              🍅 Pomodoro Progress
+            </h3>
+            <Badge variant="outline" className="text-blue-700 dark:text-blue-300">
+              Active Session
+            </Badge>
+          </div>
+          <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
+            Focus on this task during your Pomodoro session. Stay concentrated and avoid distractions!
+          </p>
+          
+          {/* Quick stats */}
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="text-blue-600 dark:text-blue-400">Today's Focus:</span>
+              <div className="font-medium">
+                {localStorage.getItem('pomodoroCycles') || 0} cycles completed
+              </div>
+            </div>
+            <div>
+              <span className="text-blue-600 dark:text-blue-400">Estimated Time:</span>
+              <div className="font-medium">
+                {currentTask.estimatedHours || 'Not set'} hours
+              </div>
+            </div>
+          </div>
+        </div>
        
         {/* Quick Actions */}
         <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-600">Quick Actions:</span>
             <div className="flex gap-2">
-              <Button size="sm" variant="outline">
-                Mark Complete
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={() => handleMarkComplete()}
+                disabled={loading}
+              >
+                {currentTask.status === 'completed' ? 'Completed ✓' : 'Mark Complete'}
               </Button>
-              <Button size="sm" variant="outline">
-                Edit Task
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={() => window.history.back()}
+              >
+                Back to Tasks
               </Button>
             </div>
           </div>
